@@ -2,14 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OpenedSavingAccount;
 use Illuminate\Http\Request;
+use App\Models\LockerAccount;
+use App\Models\LockerFeature;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class OpenedSavingAccountController extends Controller
+class LockerController extends Controller
 {
+
+    public function index()
+    {
+        $locker_features = LockerFeature::select(
+            'id',
+            'header_one',
+            'point_one',
+            'point_two',
+            'point_three',
+            'point_four',
+            'point_five'
+        )
+        ->latest()
+        ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $locker_features,
+            'message'=> "Locker Features data fetched successfully"
+        ]);
+    }
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -18,7 +41,7 @@ class OpenedSavingAccountController extends Controller
             'ph_no' => 'required|digits:10'
         ]);
 
-        $account = OpenedSavingAccount::create($validated);
+        $account = LockerAccount::create($validated);
 
         return response()->json([
             'status' => true,
@@ -27,17 +50,16 @@ class OpenedSavingAccountController extends Controller
         ]);
     }
 
-    public function OpenedSavingsAccs()
-    {
-        $opened_savings_accs = OpenedSavingAccount::select(
-            '*' 
+    public function openedLockerAccounts(){
+        $locker_accounts = LockerAccount::select(
+            '*'
         )->where('status','Y')
         ->get();
 
         return response()->json([
             'success' => true,
-            'data' => $opened_savings_accs,
-            'message'=> "Opened Savings Accounts data fetched successfully"
+            'data' => $locker_accounts,
+            'message'=> "Locker Accounts data fetched successfully"
         ]);
     }
 
@@ -57,7 +79,7 @@ class OpenedSavingAccountController extends Controller
         ]);
 
 
-        $account = OpenedSavingAccount::find($id);
+        $account = LockerAccount::find($id);
 
 
         if(!$account){
@@ -85,11 +107,10 @@ class OpenedSavingAccountController extends Controller
 
     }
 
-    // +++++++++++++++++++++ code added by Anirban Ghosh on 18th July +++++++++++++++++++++++++++++ \\
-
+    // +++++++++++++++++++++++++++++++++++ code added by Anirban Ghosh on 18th July,2026 ++++++++++++++++++++++++++++ \\
     public function destroy($id)
     {
-        $account = OpenedSavingAccount::find($id);
+        $account = LockerAccount::find($id);
 
         if (!$account) {
             return response()->json([
@@ -114,7 +135,7 @@ class OpenedSavingAccountController extends Controller
 
                 public function collection()
                 {
-                    return OpenedSavingAccount::where('status', 'Y')
+                    return LockerAccount::where('status', 'Y')
                         ->select('name', 'address', 'ph_no')
                         ->get();
                 }
@@ -129,7 +150,7 @@ class OpenedSavingAccountController extends Controller
                 }
 
             },
-            'Saving_Banking_Accounts.xlsx'
+            'Locker_Account.xlsx'
         );
     }
 }

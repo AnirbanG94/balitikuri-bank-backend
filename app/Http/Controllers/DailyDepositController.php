@@ -2,14 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OpenedSavingAccount;
 use Illuminate\Http\Request;
+use App\Models\DailyDeposit;
+use App\Models\OpenDailyDeposit;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class OpenedSavingAccountController extends Controller
+class DailyDepositController extends Controller
 {
+    public function index()
+    {
+        $daily_dep_data = DailyDeposit::select(
+            '*'
+        )
+        ->latest()
+        ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $daily_dep_data,
+            'message'=> "Daily Deposit data fetched successfully"
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -18,7 +34,7 @@ class OpenedSavingAccountController extends Controller
             'ph_no' => 'required|digits:10'
         ]);
 
-        $account = OpenedSavingAccount::create($validated);
+        $account = OpenDailyDeposit::create($validated);
 
         return response()->json([
             'status' => true,
@@ -27,17 +43,17 @@ class OpenedSavingAccountController extends Controller
         ]);
     }
 
-    public function OpenedSavingsAccs()
-    {
-        $opened_savings_accs = OpenedSavingAccount::select(
-            '*' 
-        )->where('status','Y')
-        ->get();
+    // +++++++++++++++++++++++++++++++++++ code added by Anirban Ghosh on 14th JULY,2026 ++++++++++++++++++++++++++++ \\
+
+    public function getOpenedDailyDepositAccounts(){
+        $opened_daily_dep_data = OpenDailyDeposit::select(
+            '*'
+        )->where('status','Y')->get();
 
         return response()->json([
             'success' => true,
-            'data' => $opened_savings_accs,
-            'message'=> "Opened Savings Accounts data fetched successfully"
+            'data' => $opened_daily_dep_data,
+            'message'=> "Daily Deposit data fetched successfully"
         ]);
     }
 
@@ -57,7 +73,7 @@ class OpenedSavingAccountController extends Controller
         ]);
 
 
-        $account = OpenedSavingAccount::find($id);
+        $account = OpenDailyDeposit::find($id);
 
 
         if(!$account){
@@ -85,11 +101,11 @@ class OpenedSavingAccountController extends Controller
 
     }
 
-    // +++++++++++++++++++++ code added by Anirban Ghosh on 18th July +++++++++++++++++++++++++++++ \\
+    // +++++++++++++++++++++++++++++++++ CODE ADDED BY ANIRBAN GHOSH ON 19TH JULY,2026 ++++++++++++++++++++++++++++++ \\
 
     public function destroy($id)
     {
-        $account = OpenedSavingAccount::find($id);
+        $account = OpenDailyDeposit::find($id);
 
         if (!$account) {
             return response()->json([
@@ -106,7 +122,6 @@ class OpenedSavingAccountController extends Controller
             'message' => 'Record deleted successfully.'
         ]);
     }
-
     public function export()
     {
         return Excel::download(
@@ -114,7 +129,7 @@ class OpenedSavingAccountController extends Controller
 
                 public function collection()
                 {
-                    return OpenedSavingAccount::where('status', 'Y')
+                    return OpenDailyDeposit::where('status', 'Y')
                         ->select('name', 'address', 'ph_no')
                         ->get();
                 }
@@ -129,7 +144,7 @@ class OpenedSavingAccountController extends Controller
                 }
 
             },
-            'Saving_Banking_Accounts.xlsx'
+            'Term_Deposit_Accounts.xlsx'
         );
     }
 }

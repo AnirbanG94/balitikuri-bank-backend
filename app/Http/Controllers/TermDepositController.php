@@ -2,14 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OpenedSavingAccount;
 use Illuminate\Http\Request;
+use App\Models\TermDepositRequirements;
+use App\Models\OpenTermDeposits;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class OpenedSavingAccountController extends Controller
+class TermDepositController extends Controller
 {
+
+    public function index()
+    {
+        $term_account_doc = TermDepositRequirements::select(
+            'id',
+            'header',
+            'fixed_deposit',
+            'monthly_income_scheme',
+            'cash_certificate',
+            'recurring_deposit_account',
+            'nitya_nidhi'
+        )
+        ->latest()
+        ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $term_account_doc,
+            'message'=> "Term Account data fetched successfully"
+        ]);
+    }
+    
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -18,7 +42,7 @@ class OpenedSavingAccountController extends Controller
             'ph_no' => 'required|digits:10'
         ]);
 
-        $account = OpenedSavingAccount::create($validated);
+        $account = OpenTermDeposits::create($validated);
 
         return response()->json([
             'status' => true,
@@ -27,18 +51,16 @@ class OpenedSavingAccountController extends Controller
         ]);
     }
 
-    public function OpenedSavingsAccs()
-    {
-        $opened_savings_accs = OpenedSavingAccount::select(
-            '*' 
-        )->where('status','Y')
-        ->get();
+    // +++++++++++++++++++++++++++++++++++ Code added by Anirban Ghosh on 18th July,2026 +++++++++++++++++++++++ \\
 
+    public function getOpenedTermAccounts(){
+        $term_deposits = OpenTermDeposits::select('*')->where('status','Y')->get();
         return response()->json([
-            'success' => true,
-            'data' => $opened_savings_accs,
-            'message'=> "Opened Savings Accounts data fetched successfully"
+            'status' => true,
+            'message' => 'Application submitted successfully',
+            'data' => $term_deposits
         ]);
+
     }
 
     public function update(Request $request, $id)
@@ -57,7 +79,7 @@ class OpenedSavingAccountController extends Controller
         ]);
 
 
-        $account = OpenedSavingAccount::find($id);
+        $account = OpenTermDeposits::find($id);
 
 
         if(!$account){
@@ -89,7 +111,7 @@ class OpenedSavingAccountController extends Controller
 
     public function destroy($id)
     {
-        $account = OpenedSavingAccount::find($id);
+        $account = OpenTermDeposits::find($id);
 
         if (!$account) {
             return response()->json([
@@ -107,6 +129,8 @@ class OpenedSavingAccountController extends Controller
         ]);
     }
 
+    // ++++++++++++++++++++++++++++++++++++++ CODE ADDED BY ANIRBAN GHOSH ON 19TH JULY,2026 +++++++++++++++++++++++++++++++ \\
+
     public function export()
     {
         return Excel::download(
@@ -114,7 +138,7 @@ class OpenedSavingAccountController extends Controller
 
                 public function collection()
                 {
-                    return OpenedSavingAccount::where('status', 'Y')
+                    return OpenTermDeposits::where('status', 'Y')
                         ->select('name', 'address', 'ph_no')
                         ->get();
                 }
@@ -129,7 +153,7 @@ class OpenedSavingAccountController extends Controller
                 }
 
             },
-            'Saving_Banking_Accounts.xlsx'
+            'Term_Accounts.xlsx'
         );
     }
 }

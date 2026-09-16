@@ -2,14 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OpenedSavingAccount;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
+use App\Models\DebitCard;
+use App\Models\ApplyDebitCard;
 
-class OpenedSavingAccountController extends Controller
+class DebitCardController extends Controller
 {
+    public function index()
+    {
+        $debit_features = DebitCard::select(
+            '*'
+        )
+        ->latest()
+        ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $debit_features,
+            'message'=> "Debit Features data fetched successfully"
+        ]);
+    }
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -18,7 +31,7 @@ class OpenedSavingAccountController extends Controller
             'ph_no' => 'required|digits:10'
         ]);
 
-        $account = OpenedSavingAccount::create($validated);
+        $account = ApplyDebitCard::create($validated);
 
         return response()->json([
             'status' => true,
@@ -27,17 +40,17 @@ class OpenedSavingAccountController extends Controller
         ]);
     }
 
-    public function OpenedSavingsAccs()
+    public function openedDebitCards()
     {
-        $opened_savings_accs = OpenedSavingAccount::select(
-            '*' 
-        )->where('status','Y')
+        $applied_debit_cards = ApplyDebitCard::select(
+            '*'
+        )
         ->get();
 
         return response()->json([
             'success' => true,
-            'data' => $opened_savings_accs,
-            'message'=> "Opened Savings Accounts data fetched successfully"
+            'data' => $applied_debit_cards,
+            'message'=> "Applied Debit Cards data fetched successfully"
         ]);
     }
 
@@ -57,7 +70,7 @@ class OpenedSavingAccountController extends Controller
         ]);
 
 
-        $account = OpenedSavingAccount::find($id);
+        $account = ApplyDebitCard::find($id);
 
 
         if(!$account){
@@ -89,7 +102,7 @@ class OpenedSavingAccountController extends Controller
 
     public function destroy($id)
     {
-        $account = OpenedSavingAccount::find($id);
+        $account = ApplyDebitCard::find($id);
 
         if (!$account) {
             return response()->json([
@@ -98,38 +111,11 @@ class OpenedSavingAccountController extends Controller
             ], 404);
         }
 
-        $account->status = 'N';
-        $account->save();
+        $account->delete();
 
         return response()->json([
             'status' => true,
             'message' => 'Record deleted successfully.'
         ]);
-    }
-
-    public function export()
-    {
-        return Excel::download(
-            new class implements FromCollection, WithHeadings {
-
-                public function collection()
-                {
-                    return OpenedSavingAccount::where('status', 'Y')
-                        ->select('name', 'address', 'ph_no')
-                        ->get();
-                }
-
-                public function headings(): array
-                {
-                    return [
-                        'Name',
-                        'Address',
-                        'Phone Number'
-                    ];
-                }
-
-            },
-            'Saving_Banking_Accounts.xlsx'
-        );
     }
 }

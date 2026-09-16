@@ -2,14 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OpenedSavingAccount;
 use Illuminate\Http\Request;
+use App\Models\MobileBanking;
+use App\Models\AppliedForMobileBanking;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class OpenedSavingAccountController extends Controller
+class MobileBankingController extends Controller
 {
+    public function index()
+    {
+        $mobile_banking_features = MobileBanking::select(
+            '*'
+        )
+        ->latest()
+        ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $mobile_banking_features,
+            'message'=> "Mobile Banking data fetched successfully"
+        ]);
+    }
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -18,7 +34,7 @@ class OpenedSavingAccountController extends Controller
             'ph_no' => 'required|digits:10'
         ]);
 
-        $account = OpenedSavingAccount::create($validated);
+        $account = AppliedForMobileBanking::create($validated);
 
         return response()->json([
             'status' => true,
@@ -27,17 +43,16 @@ class OpenedSavingAccountController extends Controller
         ]);
     }
 
-    public function OpenedSavingsAccs()
-    {
-        $opened_savings_accs = OpenedSavingAccount::select(
-            '*' 
+    public function getMobileBankingFeatures(){
+        $locker_accounts = AppliedForMobileBanking::select(
+            '*'
         )->where('status','Y')
         ->get();
 
         return response()->json([
             'success' => true,
-            'data' => $opened_savings_accs,
-            'message'=> "Opened Savings Accounts data fetched successfully"
+            'data' => $locker_accounts,
+            'message'=> "Locker Accounts data fetched successfully"
         ]);
     }
 
@@ -57,7 +72,7 @@ class OpenedSavingAccountController extends Controller
         ]);
 
 
-        $account = OpenedSavingAccount::find($id);
+        $account = AppliedForMobileBanking::find($id);
 
 
         if(!$account){
@@ -84,12 +99,11 @@ class OpenedSavingAccountController extends Controller
         ]);
 
     }
-
     // +++++++++++++++++++++ code added by Anirban Ghosh on 18th July +++++++++++++++++++++++++++++ \\
 
     public function destroy($id)
     {
-        $account = OpenedSavingAccount::find($id);
+        $account = AppliedForMobileBanking::find($id);
 
         if (!$account) {
             return response()->json([
@@ -99,7 +113,7 @@ class OpenedSavingAccountController extends Controller
         }
 
         $account->status = 'N';
-        $account->save();
+        $account->save();   
 
         return response()->json([
             'status' => true,
@@ -114,7 +128,7 @@ class OpenedSavingAccountController extends Controller
 
                 public function collection()
                 {
-                    return OpenedSavingAccount::where('status', 'Y')
+                    return AppliedForMobileBanking::where('status', 'Y')
                         ->select('name', 'address', 'ph_no')
                         ->get();
                 }
@@ -129,7 +143,7 @@ class OpenedSavingAccountController extends Controller
                 }
 
             },
-            'Saving_Banking_Accounts.xlsx'
+            'Mobile_Banking_Accounts.xlsx'
         );
     }
 }

@@ -2,14 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OpenedSavingAccount;
 use Illuminate\Http\Request;
+use App\Models\MortgageLoan;
+use App\Models\OpenedMortgageLoan;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class OpenedSavingAccountController extends Controller
+
+class MortgageLoanController extends Controller
 {
+    public function index()
+    {
+        $mortgage_features = MortgageLoan::select('*')
+        ->latest()
+        ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $mortgage_features,
+            'message'=> "Mortgage Loan Features data fetched successfully"
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -18,7 +33,7 @@ class OpenedSavingAccountController extends Controller
             'ph_no' => 'required|digits:10'
         ]);
 
-        $account = OpenedSavingAccount::create($validated);
+        $account = OpenedMortgageLoan::create($validated);
 
         return response()->json([
             'status' => true,
@@ -27,17 +42,18 @@ class OpenedSavingAccountController extends Controller
         ]);
     }
 
-    public function OpenedSavingsAccs()
-    {
-        $opened_savings_accs = OpenedSavingAccount::select(
-            '*' 
+
+    // +++++++++++++++++++++++++++++++ code added on 14th July,2026 by Anirban Ghosh ++++++++++++++++++++++++++++++ \\
+    public function getOpenedMortgageLoanAccounts(){
+        $mortgage_loan_accounts = OpenedMortgageLoan::select(
+            '*'
         )->where('status','Y')
         ->get();
 
         return response()->json([
             'success' => true,
-            'data' => $opened_savings_accs,
-            'message'=> "Opened Savings Accounts data fetched successfully"
+            'data' => $mortgage_loan_accounts,
+            'message'=> "Mortgage Loan Accounts data fetched successfully"
         ]);
     }
 
@@ -57,7 +73,7 @@ class OpenedSavingAccountController extends Controller
         ]);
 
 
-        $account = OpenedSavingAccount::find($id);
+        $account = OpenedMortgageLoan::find($id);
 
 
         if(!$account){
@@ -85,11 +101,11 @@ class OpenedSavingAccountController extends Controller
 
     }
 
-    // +++++++++++++++++++++ code added by Anirban Ghosh on 18th July +++++++++++++++++++++++++++++ \\
-
+    // +++++++++++++++++++++++++++++ CODE ADDED BY Anirban GHOSH ON 21st july,2026 ++++++++++++++++++++++++++++++++ \\
+    
     public function destroy($id)
     {
-        $account = OpenedSavingAccount::find($id);
+        $account = OpenedMortgageLoan::find($id);
 
         if (!$account) {
             return response()->json([
@@ -99,7 +115,7 @@ class OpenedSavingAccountController extends Controller
         }
 
         $account->status = 'N';
-        $account->save();
+        $account->save();   
 
         return response()->json([
             'status' => true,
@@ -114,7 +130,7 @@ class OpenedSavingAccountController extends Controller
 
                 public function collection()
                 {
-                    return OpenedSavingAccount::where('status', 'Y')
+                    return OpenedMortgageLoan::where('status', 'Y')
                         ->select('name', 'address', 'ph_no')
                         ->get();
                 }
@@ -129,7 +145,7 @@ class OpenedSavingAccountController extends Controller
                 }
 
             },
-            'Saving_Banking_Accounts.xlsx'
+            'Mortgage_Accounts.xlsx'
         );
     }
 }
