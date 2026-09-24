@@ -245,7 +245,9 @@ Route::get('/reg-dev-data', [RegDevUrbanCoOpRBIController::class, 'index']);
 Route::get('/cust-awareness-data', [CustomerAwarenessController::class, 'index']);
 
 // ++++++++++++++++++++++++++++ route added for debit card page on 2nd July,2026 by Anirban Ghosh ++++++++++++++++++++++ \\
-
+Route::get('/countries', [DebitCardController::class, 'getCountries']);
+Route::get('/states', [DebitCardController::class, 'getStates']);
+Route::get('/cities', [DebitCardController::class, 'getCities']);
 Route::get('/debit-card-features', [DebitCardController::class, 'index']);
 Route::post('/apply-debit-card', [DebitCardController::class, 'store']);
 Route::get('/opened-debit-cards', [DebitCardController::class, 'openedDebitCards']);

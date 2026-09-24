@@ -10,14 +10,18 @@ class ApplyDebitCard extends Model
 
     protected $table = 'apply_debit_cards';
 
-    protected $fillable=[
-
+    protected $fillable = [
         'name',
-
         'address',
-
-        'ph_no'
-
+        'ph_no',
+        'country_id',
+        'state_id',
+        'city_id',
+        'employment_type',
+        'card_type',
+        'account_balance',
+        'charges_applicable',
+        'applicant_image' // Must be included
     ];
 
    
